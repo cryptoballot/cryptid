@@ -8,7 +8,6 @@ use num_bigint::BigUint;
 use rand::{CryptoRng, Rng};
 
 use crate::base64_serde;
-use crate::scalar::DalekScalar;
 use crate::util::{AsBase64, K, SCALAR_MAX_BYTES};
 use crate::{CryptoError, Hasher, Scalar};
 
@@ -43,16 +42,16 @@ impl CurveElem {
             return Err(CryptoError::TooLarge);
         }
 
-        let buffer = DalekScalar::from(2u32.pow(K));
+        let buffer = rust_elgamal::Scalar::from(2u32.pow(K));
         s *= buffer;
-        let mut d = DalekScalar::zero();
+        let mut d = rust_elgamal::Scalar::zero();
         loop {
             if let Some(p) = CompressedRistretto((s + d).to_bytes()).decompress() {
                 return Ok(Self(p));
             }
 
-            d += DalekScalar::one();
-            if d - buffer == DalekScalar::zero() {
+            d += rust_elgamal::Scalar::one();
+            if d - buffer == rust_elgamal::Scalar::zero() {
                 return Err(CryptoError::Encoding);
             }
         }
@@ -201,7 +200,7 @@ pub struct Polynomial {
     n: usize,
     pub x_i: Scalar,
 
-    coefficients: Vec<DalekScalar>,
+    coefficients: Vec<rust_elgamal::Scalar>,
 }
 
 impl Polynomial {
@@ -231,7 +230,7 @@ impl Polynomial {
     pub fn evaluate(&self, i: u32) -> Scalar {
         Scalar(
             (0..self.k)
-                .map(|l| self.coefficients[l] * DalekScalar::from(i.pow(l as u32)))
+                .map(|l| self.coefficients[l] * rust_elgamal::Scalar::from(i.pow(l as u32)))
                 .sum(),
         )
     }

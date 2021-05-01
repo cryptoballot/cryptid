@@ -10,7 +10,6 @@ use serde::{Deserialize, Serialize};
 use crate::curve::GENERATOR;
 use crate::curve::{CurveElem, Polynomial};
 use crate::elgamal::{Ciphertext, PublicKey};
-use crate::scalar::DalekScalar;
 use crate::util::AsBase64;
 use crate::{zkp, CryptoError, Scalar};
 
@@ -86,7 +85,7 @@ pub struct ThresholdGenerator {
     min_trustees: usize,
     trustee_count: usize,
     polynomial: Polynomial,
-    shares: HashMap<usize, DalekScalar>,
+    shares: HashMap<usize, rust_elgamal::Scalar>,
     commitments: HashMap<usize, KeygenCommitment>,
     pk_parts: Vec<CurveElem>,
 }
@@ -353,7 +352,7 @@ impl ThresholdParty {
 }
 
 // Lagrange coefficient calculation
-fn lambda<I: Iterator<Item = usize>>(parties: I, j: usize) -> DalekScalar {
+fn lambda<I: Iterator<Item = usize>>(parties: I, j: usize) -> rust_elgamal::Scalar {
     let mut numerator = 1;
     let mut denominator = 1;
     for l in parties {
@@ -369,9 +368,9 @@ fn lambda<I: Iterator<Item = usize>>(parties: I, j: usize) -> DalekScalar {
 
     // Convert signed int to scalar
     if result < 0 {
-        -DalekScalar::from((-result) as u32)
+        -rust_elgamal::Scalar::from((-result) as u32)
     } else {
-        DalekScalar::from(result as u32)
+        rust_elgamal::Scalar::from(result as u32)
     }
 }
 

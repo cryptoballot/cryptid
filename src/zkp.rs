@@ -255,7 +255,6 @@ mod tests {
     use crate::curve::CurveElem;
     use crate::curve::GENERATOR;
     use crate::elgamal::PublicKey;
-    use crate::scalar::DalekScalar;
     use crate::zkp::{PrfDecryption, PrfEqDlogs, PrfKnowPlaintext};
     use crate::Scalar;
     use std::convert::TryFrom;
@@ -316,7 +315,7 @@ mod tests {
         let enc = pk.encrypt(&m, &r);
 
         let mut proof = PrfKnowPlaintext::new(&mut rng, enc, r);
-        proof.r.0 += &DalekScalar::one();
+        proof.r.0 += &rust_elgamal::Scalar::one();
         assert!(!proof.verify());
     }
 
@@ -349,7 +348,7 @@ mod tests {
         let w = h.scaled(&x);
 
         let mut proof = PrfEqDlogs::new(&mut rng, &f, &h, &v, &w, &x);
-        proof.r.0 += &DalekScalar::one();
+        proof.r.0 += &rust_elgamal::Scalar::one();
 
         assert!(!proof.verify());
     }
@@ -381,7 +380,7 @@ mod tests {
         let dec = enc.c1.scaled(&x);
 
         let mut proof = PrfDecryption::new(&mut rng, enc, dec, x, pk.y);
-        proof.r.0 += &DalekScalar::one();
+        proof.r.0 += &rust_elgamal::Scalar::one();
 
         assert!(!proof.verify());
     }

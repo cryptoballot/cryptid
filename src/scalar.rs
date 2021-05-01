@@ -1,16 +1,13 @@
 use crate::curve::CurveElem;
 use crate::{base64_serde, AsBase64, CryptoError};
-use curve25519_dalek::scalar::Scalar as InternalDalekScalar;
 use num_bigint::BigUint;
 use rand::{CryptoRng, Rng};
 use std::convert::{TryFrom, TryInto};
 use std::iter::{Product, Sum};
 use std::ops::{Add, Mul, Neg};
 
-pub(crate) type DalekScalar = InternalDalekScalar;
-
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
-pub struct Scalar(pub(crate) DalekScalar);
+pub struct Scalar(pub(crate) rust_elgamal::Scalar);
 
 impl Scalar {
     pub fn random<R: Rng + CryptoRng>(rng: &mut R) -> Self {
@@ -92,13 +89,13 @@ impl Neg for Scalar {
 
 impl Sum<Scalar> for Scalar {
     fn sum<I: Iterator<Item = Scalar>>(iter: I) -> Self {
-        iter.fold(Scalar(DalekScalar::zero()), |a, b| a + b)
+        iter.fold(Scalar(rust_elgamal::Scalar::zero()), |a, b| a + b)
     }
 }
 
 impl Product<Scalar> for Scalar {
     fn product<I: Iterator<Item = Scalar>>(iter: I) -> Self {
-        iter.fold(Scalar(DalekScalar::one()), |a, b| a * b)
+        iter.fold(Scalar(rust_elgamal::Scalar::one()), |a, b| a * b)
     }
 }
 
@@ -134,13 +131,13 @@ impl From<u128> for Scalar {
 
 impl From<[u8; 32]> for Scalar {
     fn from(bytes: [u8; 32]) -> Self {
-        Self(DalekScalar::from_bytes_mod_order(bytes).reduce())
+        Self(rust_elgamal::Scalar::from_bytes_mod_order(bytes).reduce())
     }
 }
 
 impl From<[u8; 64]> for Scalar {
     fn from(bytes: [u8; 64]) -> Self {
-        Self(DalekScalar::from_bytes_mod_order_wide(&bytes).reduce())
+        Self(rust_elgamal::Scalar::from_bytes_mod_order_wide(&bytes).reduce())
     }
 }
 
